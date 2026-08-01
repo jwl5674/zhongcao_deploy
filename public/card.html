@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>种草卡</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f6fa; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .card-container { max-width: 420px; width: 100%; background: #ffffff; border-radius: 24px; box-shadow: 0 8px 40px rgba(0,0,0,0.08); overflow: hidden; padding: 32px 24px 40px; text-align: center; position: relative; }
+        .brand-corner { position: absolute; top: 14px; font-size: 11px; font-weight: 500; color: #bbb; letter-spacing: 1px; user-select: none; pointer-events: none; }
+        .brand-left { left: 20px; }
+        .brand-right { right: 20px; }
+        .shop-header { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 8px; margin-bottom: 12px; }
+        .shop-avatar { width: 56px; height: 56px; border-radius: 50%; background: #e8ecf1; overflow: hidden; flex-shrink: 0; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .shop-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .shop-avatar .placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; background: #dce3ed; color: #8a9bb5; }
+        .shop-name { font-size: 20px; font-weight: 600; color: #1a1a2e; letter-spacing: 0.5px; }
+        .shop-name .sub { font-size: 13px; font-weight: 400; color: #999; display: block; margin-top: 2px; }
+        .main-title { font-size: 32px; font-weight: 700; color: #1a1a2e; letter-spacing: 4px; margin: 12px 0 6px; background: linear-gradient(135deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .main-sub { font-size: 13px; color: #aaa; margin-bottom: 24px; letter-spacing: 2px; }
+        .platform-grid { display: flex; justify-content: center; gap: 20px; margin-top: 8px; }
+        .platform-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.15s ease; -webkit-tap-highlight-color: transparent; border: none; background: none; padding: 0; width: 80px; }
+        .platform-btn:active { transform: scale(0.92); }
+        .platform-btn .icon-wrap { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.10); position: relative; }
+        .platform-btn .icon-wrap .badge-icon { position: absolute; top: -4px; right: -4px; font-size: 18px; }
+        .platform-btn .label { font-size: 13px; font-weight: 500; color: #333; }
+        .platform-btn .label .hint { font-weight: 400; font-size: 11px; color: #999; display: block; }
+        .btn-dianping .icon-wrap { background: linear-gradient(135deg, #FF6B00, #FF8C00); }
+        .btn-video .icon-wrap { background: linear-gradient(135deg, #07C160, #10b981); }
+        .btn-kuaishou .icon-wrap { background: linear-gradient(135deg, #3b8cff, #6a5acd); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.50); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; padding: 24px; z-index: 999; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: #fff; border-radius: 20px; max-width: 380px; width: 100%; padding: 28px 24px 24px; text-align: left; box-shadow: 0 20px 60px rgba(0,0,0,0.20); animation: modalIn 0.25s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-box .modal-title { font-size: 17px; font-weight: 600; color: #1a1a2e; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .modal-box .modal-desc { font-size: 14px; color: #666; line-height: 1.6; margin: 8px 0 16px; padding: 12px 16px; background: #f7f8fc; border-radius: 10px; border-left: 4px solid #1989fa; word-break: break-all; white-space: pre-wrap; }
+        .modal-box .modal-tips { font-size: 12px; color: #999; background: #fff6e5; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; line-height: 1.5; }
+        .modal-box .modal-actions { display: flex; gap: 10px; }
+        .modal-box .modal-actions button { flex: 1; padding: 12px 0; border: none; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+        .modal-box .modal-actions button:active { opacity: 0.7; }
+        .modal-box .modal-actions .btn-copy { background: #1989fa; color: #fff; }
+        .modal-box .modal-actions .btn-close { background: #f0f0f0; color: #333; }
+        .toast-tip { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.78); color: #fff; padding: 14px 28px; border-radius: 12px; font-size: 15px; z-index: 9999; pointer-events: none; display: none; max-width: 80%; text-align: center; line-height: 1.5; backdrop-filter: blur(4px); }
+        .toast-tip.show { display: block; }
+        .state-tip { padding: 40px 20px; color: #999; font-size: 15px; }
+        .state-tip .emoji { font-size: 48px; display: block; margin-bottom: 12px; }
+        .loading-spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e8ecf1; border-top-color: #1989fa; border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 12px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer { margin-top: 28px; font-size: 12px; color: #ccc; letter-spacing: 1px; }
+        .footer span { color: #ff6b6b; }
+    </style>
+</head>
+<body>
+    <div id="toast" class="toast-tip"></div>
+
+    <div id="app" class="card-container">
+        <div class="brand-corner brand-left">✦ 思思网络科技</div>
+        <div class="brand-corner brand-right">思思网络科技 ✦</div>
+
+        <div v-if="loading" class="state-tip">
+            <div class="loading-spinner"></div>加载中...
+        </div>
+        <div v-else-if="error" class="state-tip">
+            <span class="emoji">😅</span>{{ error }}
+        </div>
+        <template v-else>
+            <div class="shop-header">
+                <div class="shop-avatar">
+                    <img v-if="merchant.shopLogo" :src="merchant.shopLogo" alt="logo" />
+                    <div v-else class="placeholder">🏪</div>
+                </div>
+                <div class="shop-name">
+                    {{ merchant.shopName || '未命名商铺' }}
+                    <span class="sub">{{ merchant.category || '' }}</span>
+                </div>
+            </div>
+            <div class="main-title">✦ 点评打卡 ✦</div>
+            <div class="main-sub">分享真实体验 · 种草好店</div>
+            <div class="platform-grid">
+                <button class="platform-btn btn-dianping" @click="handleDianping">
+                    <div class="icon-wrap">🍽️<span class="badge-icon">⭐</span></div>
+                    <span class="label">大众点评<span class="hint">写评价</span></span>
+                </button>
+                <button class="platform-btn btn-video" @click="handleVideo">
+                    <div class="icon-wrap">🎬<span class="badge-icon">📤</span></div>
+                    <span class="label">视频号种草<span class="hint">分享朋友圈</span></span>
+                </button>
+                <button class="platform-btn btn-kuaishou" @click="handleKuaishou">
+                    <div class="icon-wrap">📱<span class="badge-icon">⚡</span></div>
+                    <span class="label">快手点评<span class="hint">写评价</span></span>
+                </button>
+            </div>
+            <div class="footer">— <span>❤</span> 种草卡 · 助力好店 <span>❤</span> —</div>
+        </template>
+    </div>
+
+    <div id="modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">📝 准备发布</div>
+            <div id="modalDesc" class="modal-desc">文案加载中...</div>
+            <div id="modalTips" class="modal-tips">💡 请结合真实消费体验适当修改文案后再发布</div>
+            <div class="modal-actions">
+                <button class="btn-copy" id="modalCopyBtn">📋 一键复制</button>
+                <button class="btn-close" id="modalCloseBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://fastly.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        const { createApp, ref, reactive, onMounted } = Vue;
+        const API_BASE = '';
+
+        const app = createApp({
+            setup() {
+                const loading = ref(true);
+                const error = ref('');
+                const merchant = reactive({
+                    id: '', shopName: '加载中...', shopLogo: '', shopType: '', category: '',
+                    tags: [], avgPrice: '', dianpingShopId: '', videoUrl: ''
+                });
+
+                const presetText = '这家店真的绝了！食材新鲜，味道超棒，服务也很热情，性价比超高，强烈推荐大家来打卡！🔥';
+                const presetTips = '💡 请结合真实消费体验适当修改文案后再发布，避免被平台判定为违规评价。';
+
+                function showToast(msg, duration) {
+                    const el = document.getElementById('toast');
+                    if (!el) return;
+                    el.textContent = msg;
+                    el.classList.add('show');
+                    clearTimeout(el._timer);
+                    el._timer = setTimeout(() => { el.classList.remove('show'); }, duration || 2000);
+                }
+
+                function openModal(text, tips) {
+                    const overlay = document.getElementById('modal');
+                    const descEl = document.getElementById('modalDesc');
+                    const tipsEl = document.getElementById('modalTips');
+                    if (descEl) descEl.textContent = text || presetText;
+                    if (tipsEl) tipsEl.textContent = tips || presetTips;
+                    if (overlay) overlay.classList.add('show');
+                }
+
+                function closeModal() {
+                    const overlay = document.getElementById('modal');
+                    if (overlay) overlay.classList.remove('show');
+                }
+
+                function copyText(text) {
+                    const content = text || presetText;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(content).then(() => showToast('✅ 已复制到剪贴板'))
+                            .catch(() => fallbackCopy(content));
+                    } else { fallbackCopy(content); }
+                }
+
+                function fallbackCopy(text) {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try { document.execCommand('copy');
+                        showToast('✅ 已复制到剪贴板'); } catch (e) { showToast('❌ 复制失败，请手动复制'); }
+                    document.body.removeChild(ta);
+                }
+
+                async function loadMerchant() {
+                    const params = new URLSearchParams(window.location.search);
+                    const merchantId = params.get('merchantId');
+                    if (!merchantId) {
+                        error.value = '缺少商家ID';
+                        loading.value = false;
+                        return;
+                    }
+                    try {
+                        const res = await fetch(API_BASE + '/api/merchant/' + merchantId);
+                        const data = await res.json();
+                        if (data.success) {
+                            const m = data.data;
+                            merchant.id = m._id;
+                            merchant.shopName = m.shopName;
+                            merchant.shopLogo = m.shopLogo;
+                            merchant.shopType = m.shopType;
+                            merchant.category = m.category;
+                            merchant.tags = m.tags || [];
+                            merchant.avgPrice = m.avgPrice;
+                            merchant.dianpingShopId = m.dianpingShopId;
+                            merchant.videoUrl = m.videoUrl;
+                        } else {
+                            error.value = data.message || '加载失败';
+                        }
+                    } catch (e) {
+                        error.value = '网络错误，请检查服务是否运行';
+                    } finally {
+                        loading.value = false;
+                    }
+                }
+
+                function handleDianping() {
+                    const shopId = merchant.dianpingShopId || '123456789';
+                    openModal(presetText, presetTips);
+                    try { window.location.href = 'dianping://shopinfo?id=' + shopId; } catch (e) {}
+                }
+
+                function handleVideo() {
+                    const ua = navigator.userAgent.toLowerCase();
+                    const isWechat = ua.indexOf('micromessenger') !== -1;
+                    const videoUrl = merchant.videoUrl || '';
+                    if (isWechat) {
+                        if (videoUrl) {
+                            window.location.href = videoUrl;
+                            setTimeout(() => showToast('请点击右上角"..."分享到朋友圈', 3000), 3000);
+                        } else { showToast('商家暂未配置视频号链接', 2000); }
+                    } else {
+                        if (videoUrl) {
+                            const tipText = '📱 请复制下方链接，在微信内打开后分享：\n\n' + videoUrl;
+                            openModal(tipText, '💡 长按复制链接 → 打开微信 → 粘贴到聊天框或朋友圈发布');
+                            copyText(videoUrl);
+                            setTimeout(() => showToast('✅ 视频链接已复制，请去微信打开', 3000), 500);
+                        } else { showToast('📱 请在微信内打开此页面', 2000);
+                            copyText(window.location.href); }
+                    }
+                }
+
+                function handleKuaishou() {
+                    const shopId = merchant.dianpingShopId || '123456789';
+                    openModal(presetText, presetTips);
+                    try { window.location.href = 'kwai://' + shopId; } catch (e) {}
+                }
+
+                onMounted(() => {
+                    loadMerchant();
+                    document.getElementById('modalCopyBtn').addEventListener('click', function() {
+                        const desc = document.getElementById('modalDesc');
+                        copyText(desc ? desc.textContent : presetText);
+                    });
+                    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+                    document.getElementById('modal').addEventListener('click', function(e) {
+                        if (e.target === this) closeModal();
+                    });
+                });
+
+                return { loading, error, merchant, handleDianping, handleVideo, handleKuaishou };
+            }
+        });
+        app.mount('#app');
+    </script>
+</body>
+</html>
